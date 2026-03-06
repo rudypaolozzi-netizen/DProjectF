@@ -10,34 +10,56 @@ import { useBudget } from '../hooks/useBudget';
 export default function DashboardPage() {
     const navigate = useNavigate();
     const { transactions } = useTransactions();
-    const { budget } = useBudget();
 
     const stats = useMemo(() => {
         const now = new Date();
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
 
-        let income = 0;
+        let totalIncome = 0;
+        let totalExpenses = 0;
+        let positiveReg = 0;
+        let negativeReg = 0;
         let fixed = 0;
         let variable = 0;
-        let regulation = 0;
 
         transactions.forEach(tx => {
             const txDate = new Date(tx.transaction_date);
             if (txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) {
                 const amt = parseFloat(tx.amount);
-                if (tx.type === 'income') income += amt;
-                else if (tx.type === 'fixed') fixed += amt;
-                else if (tx.type === 'expense') variable += amt;
-                else if (tx.type === 'regulation') regulation += amt;
+                if (tx.type === 'income') {
+                    totalIncome += amt;
+                } else if (tx.type === 'fixed') {
+                    fixed += amt;
+                    totalExpenses += amt;
+                } else if (tx.type === 'expense') {
+                    variable += amt;
+                    totalExpenses += amt;
+                } else if (tx.type === 'regulation') {
+                    if (amt >= 0) {
+                        positiveReg += amt;
+                        totalIncome += amt;
+                    } else {
+                        negativeReg += Math.abs(amt);
+                        totalExpenses += Math.abs(amt);
+                    }
+                }
             }
         });
 
-        const ceiling = budget?.ceiling || 0;
-        const remaining = ceiling + income - fixed - variable + regulation;
+        const remaining = totalIncome - totalExpenses;
 
-        return { remaining, ceiling, fixed, income, variable, regulation };
-    }, [transactions, budget]);
+        return {
+            remaining,
+            totalIncome,
+            totalExpenses,
+            fixed,
+            income: totalIncome - positiveReg,
+            variable,
+            positiveReg,
+            negativeReg
+        };
+    }, [transactions]);
 
     const recentTransactions = transactions.slice(0, 3).map(tx => ({
         id: tx.id,
@@ -54,7 +76,7 @@ export default function DashboardPage() {
                 <PageHeader title="Tableau de Bord" />
 
                 <main className="flex-1 flex flex-col gap-6 p-4">
-                    <BudgetGauge remaining={stats.remaining} ceiling={stats.ceiling} />
+                    <BudgetGauge remaining={stats.remaining} totalIncome={stats.totalIncome} />
 
                     {/* Régulation du mois */}
                     <section className="flex flex-col gap-3">
