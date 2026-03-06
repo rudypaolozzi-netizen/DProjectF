@@ -30,7 +30,7 @@ export default function HistoryPage() {
         }));
     }, [transactions]);
 
-    const monthlyBalance = useMemo(() => {
+    const regulationImpact = useMemo(() => {
         const now = new Date();
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
@@ -38,15 +38,9 @@ export default function HistoryPage() {
         return transactions
             .filter(tx => {
                 const d = new Date(tx.transaction_date);
-                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+                return tx.type === 'regulation' && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
             })
-            .reduce((sum, tx) => {
-                const amt = parseFloat(tx.amount);
-                if (tx.type === 'income') return sum + amt;
-                if (tx.type === 'regulation') return sum + amt;
-                // fixed and expense are subtractions
-                return sum - Math.abs(amt);
-            }, 0);
+            .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
     }, [transactions]);
 
     const toggleMonth = (monthKey) => {
@@ -75,12 +69,12 @@ export default function HistoryPage() {
                 <div className="flex flex-col gap-3 px-4 py-6 relative z-0">
                     <div className="absolute inset-0 border-b border-brass/10 pointer-events-none"></div>
                     <div className="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-lg border-2 border-brass/30 bg-gradient-to-b from-brass/10 to-transparent p-5 items-center text-center shadow-[inset_0_0_20px_rgba(212,175,55,0.1)]">
-                        <p className={`${monthlyBalance >= 0 ? 'text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'} tracking-wider text-4xl font-bold leading-tight`}>
-                            {monthlyBalance >= 0 ? '+' : '-'} {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(Math.abs(monthlyBalance))}
+                        <p className={`${regulationImpact >= 0 ? 'text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'} tracking-wider text-4xl font-bold leading-tight`}>
+                            {regulationImpact >= 0 ? '+' : '-'} {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(Math.abs(regulationImpact))}
                         </p>
                         <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-brass text-sm">account_balance_wallet</span>
-                            <p className="text-slate-400 text-xs sm:text-sm font-medium uppercase tracking-widest">Solde disponible (Mois)</p>
+                            <span className="material-symbols-outlined text-brass text-sm">gavel</span>
+                            <p className="text-slate-400 text-xs sm:text-sm font-medium uppercase tracking-widest">Impact Régulations (Mois en cours)</p>
                         </div>
                     </div>
                 </div>

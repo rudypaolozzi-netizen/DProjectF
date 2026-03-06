@@ -18,8 +18,7 @@ export default function DashboardPage() {
 
         let totalIncome = 0;
         let totalExpenses = 0;
-        let positiveReg = 0;
-        let negativeReg = 0;
+        let regulationImpact = 0;
         let fixed = 0;
         let variable = 0;
 
@@ -36,28 +35,23 @@ export default function DashboardPage() {
                     variable += amt;
                     totalExpenses += amt;
                 } else if (tx.type === 'regulation') {
-                    if (amt >= 0) {
-                        positiveReg += amt;
-                        totalIncome += amt;
-                    } else {
-                        negativeReg += Math.abs(amt);
-                        totalExpenses += Math.abs(amt);
-                    }
+                    regulationImpact += amt;
                 }
             }
         });
 
-        const remaining = totalIncome - totalExpenses;
+        // The user wants the central figure to be identical to History's header
+        // which is "Impact Régulations (Mois en cours)"
+        const displayBalance = regulationImpact;
 
         return {
-            remaining,
+            displayBalance,
+            regulationImpact,
             totalIncome,
             totalExpenses,
             fixed,
-            income: totalIncome - positiveReg,
-            variable,
-            positiveReg,
-            negativeReg
+            income: totalIncome,
+            variable
         };
     }, [transactions]);
 
@@ -76,7 +70,7 @@ export default function DashboardPage() {
                 <PageHeader title="Tableau de Bord" />
 
                 <main className="flex-1 flex flex-col gap-6 p-4">
-                    <BudgetGauge remaining={stats.remaining} totalIncome={stats.totalIncome} />
+                    <BudgetGauge remaining={stats.displayBalance} totalIncome={stats.totalIncome || 1} />
 
                     {/* Régulation du mois */}
                     <section className="flex flex-col gap-3">
