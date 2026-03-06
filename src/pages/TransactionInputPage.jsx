@@ -11,10 +11,10 @@ export default function TransactionInputPage() {
     const { categories } = useCategories();
 
     const [tab, setTab] = useState('expense'); // expense, income, fixed, regulation
-    const [categoryId, setCategoryId] = useState('');
     const [label, setLabel] = useState('');
     const [amount, setAmount] = useState('');
     const [isRegulationActive, setIsRegulationActive] = useState(true);
+    const [isStamping, setIsStamping] = useState(false);
 
     // Tab configurations
     const tabs = [
@@ -79,7 +79,6 @@ export default function TransactionInputPage() {
                                 key={t.id}
                                 onClick={() => {
                                     setTab(t.id);
-                                    setCategoryId('');
                                 }}
                                 className={`flex-1 py-2 text-[10px] sm:text-xs font-bold text-center rounded transition-all border ${tab === t.id ? t.activeClass : t.inactiveClass}`}
                             >
@@ -102,7 +101,7 @@ export default function TransactionInputPage() {
                                     <span className="material-symbols-outlined text-[28px]">toll</span>
                                 </div>
                                 <input
-                                    className="w-full bg-transparent border-none text-primary placeholder-primary/20 focus:ring-0 p-4 font-mono text-3xl text-right tracking-wider outline-none drop-shadow-[0_0_5px_rgba(19,200,236,0.6)]"
+                                    className="w-full bg-transparent border-none text-primary placeholder-primary/20 focus:ring-0 p-4 font-bold text-3xl text-right tracking-wider outline-none drop-shadow-[0_0_5px_rgba(19,200,236,0.6)]"
                                     placeholder="0.00"
                                     type="number"
                                     step="0.01"
