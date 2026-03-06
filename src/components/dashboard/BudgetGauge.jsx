@@ -36,13 +36,13 @@ export default function BudgetGauge({ remaining, totalIncome }) {
             {/* Gauge content */}
             <div className={`relative z-10 flex flex-col items-center bg-surface/50 border ${isOverBudget ? 'border-red-500/50' : 'border-primary/30'} p-8 rounded-full shadow-[0_0_30px_${glowColor}] backdrop-blur-sm w-56 h-56 justify-center transition-colors duration-500`}>
                 <p className="text-on-surface-variant text-xs font-medium uppercase tracking-widest mb-2 text-center">
-                    {isOverBudget ? 'Déficit Aether' : 'Budget Restant'}
+                    {isOverBudget ? 'Déficit Aether' : 'Solde disponible'}
                 </p>
                 <p className={`text-4xl font-bold ${mainColor} drop-shadow-[0_0_10px_${glowColor}] tabular-nums transition-colors duration-500`}>
                     {isOverBudget ? '-' : ''}{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(displayAmount)}
                 </p>
                 <p className="text-xs text-on-surface-variant mt-2 font-mono opacity-80 uppercase tracking-tighter">
-                    Capacité: {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalIncome)}
+                    Entrées: {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalIncome)}
                 </p>
 
                 {/* SVG Circle progress */}
