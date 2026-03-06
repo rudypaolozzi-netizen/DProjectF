@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playball&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-display;
+    min-height: max(884px, 100dvh);
+  }
+}
+
+@layer utilities {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .material-symbols-outlined.fill {
+    font-variation-settings: 'FILL' 1;
+  }
+  
+  .bg-steampunk {
+    background: linear-gradient(135deg, #101f22 0%, #192f33 50%, #101f22 100%);
+    position: relative;
+  }
+  
+  .bg-steampunk::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(circle at 50% 50%, rgba(19, 200, 236, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .scrollbar-steampunk::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-steampunk::-webkit-scrollbar-track {
+    background: #101f22;
+  }
+  .scrollbar-steampunk::-webkit-scrollbar-thumb {
+    background: #325e67;
+    border-radius: 4px;
+  }
+}

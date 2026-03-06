@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Saisie de Transaction Steampunk</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playball&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101f22",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "cursive": ["Playball", "cursive"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #101f22; }
+        ::-webkit-scrollbar-thumb { background: #325e67; border-radius: 4px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display flex flex-col min-h-screen overflow-x-hidden selection:bg-primary/30">
+<header class="flex items-center justify-between p-4 pb-2 bg-gradient-to-b from-[#101f22] to-transparent sticky top-0 z-10">
+<button class="flex size-10 items-center justify-center text-primary/80 hover:text-primary transition-colors rounded-full hover:bg-primary/10">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-primary text-lg font-bold tracking-[0.1em] uppercase drop-shadow-[0_0_8px_rgba(19,200,236,0.4)]">Saisie Registre</h1>
+<div class="size-10"></div>
+</header>
+<main class="flex-1 flex flex-col px-4 py-2 gap-8">
+<div class="flex p-1 bg-[#152528] rounded-lg border border-[#2a454b] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
+<button class="flex-1 py-2 text-xs sm:text-sm font-bold text-center rounded bg-amber-600/20 border border-amber-600/50 text-amber-500 shadow-[0_0_12px_rgba(217,119,6,0.15)] transition-all">
+                Dépenses
+            </button>
+<button class="flex-1 py-2 text-xs sm:text-sm font-bold text-center rounded text-amber-600/70 hover:text-amber-400 transition-all border border-transparent">
+                Entrées
+            </button>
+<button class="flex-1 py-2 text-xs sm:text-sm font-bold text-center rounded text-amber-600/70 hover:text-amber-400 transition-all border border-transparent">
+                Fixes
+            </button>
+<button class="flex-1 py-2 text-xs sm:text-sm font-bold text-center rounded text-amber-600/70 hover:text-amber-400 transition-all border border-transparent">
+                Régulation
+            </button>
+</div>
+<div class="flex flex-col gap-6 relative z-10">
+<div class="absolute -left-6 top-0 bottom-0 w-2 bg-gradient-to-r from-[#4a3525] to-[#2a1b12] border-r border-[#6a4a2a] shadow-[2px_0_5px_rgba(0,0,0,0.5)] z-[-1]"></div>
+<div class="flex flex-col gap-2 relative">
+<label class="text-xl font-cursive text-amber-400 tracking-wide pl-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Libellé</label>
+<div class="flex items-center rounded-lg bg-[#111c1e] border-2 border-[#4a3525] focus-within:border-amber-600/70 transition-colors shadow-[inset_0_2px_5px_rgba(0,0,0,0.6)] overflow-hidden">
+<div class="px-4 py-3 bg-[#182629] border-r border-[#4a3525] flex items-center justify-center text-amber-600/70">
+<span class="material-symbols-outlined">label</span>
+</div>
+<input class="w-full bg-transparent border-none text-slate-200 placeholder-slate-600 focus:ring-0 p-4 font-mono text-base" placeholder="ex: Carburant Vapeur, Loyer" type="text"/>
+</div>
+</div>
+<div class="flex flex-col gap-2 relative">
+<label class="text-xl font-cursive text-amber-400 tracking-wide pl-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Montant</label>
+<div class="flex items-center rounded-lg bg-[#0d181a] border-2 border-primary/30 focus-within:border-primary transition-colors shadow-[0_0_15px_rgba(19,200,236,0.05),inset_0_2px_5px_rgba(0,0,0,0.8)] overflow-hidden group">
+<div class="px-4 py-4 bg-[#101f22] border-r border-primary/30 flex items-center justify-center text-primary group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-[28px]">toll</span>
+</div>
+<input class="w-full bg-transparent border-none text-primary placeholder-primary/20 focus:ring-0 p-4 font-mono text-3xl text-right tracking-wider drop-shadow-[0_0_5px_rgba(19,200,236,0.5)]" placeholder="0.00" type="number"/>
+</div>
+</div>
+</div>
+<div class="mt-2 bg-[#152528] border border-[#3a281c] p-4 rounded-xl flex items-center justify-between shadow-[inset_0_0_20px_rgba(0,0,0,0.4)] relative overflow-hidden">
+<div class="absolute -right-4 -top-4 size-24 bg-amber-900/10 rounded-full blur-xl"></div>
+<div class="flex flex-col relative z-10">
+<span class="text-sm font-bold text-slate-200 tracking-wide">Régulation Mensuelle</span>
+<span class="text-xs text-slate-500 font-mono mt-0.5">Basculer la polarité absolue</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer z-10">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-16 h-8 bg-[#2a1b12] border-2 border-[#1a110b] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-gradient-to-b after:from-[#b91c1c] after:to-[#7f1d1d] after:border-[#450a0a] after:border-2 after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-[0_2px_4px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.4)] peer-checked:bg-[#122a20] shadow-[inset_0_2px_6px_rgba(0,0,0,0.8)] peer-checked:after:from-amber-400 peer-checked:after:to-amber-600 peer-checked:after:border-[#5a3a1a]"></div>
+</label>
+</div>
+<div class="mt-auto pt-8 pb-4 flex items-center gap-3">
+<button class="flex-1 relative group h-24 bg-gradient-to-b from-[#3a3a3a] to-[#1a1a1a] rounded-xl border-b-[16px] border-[#0f0f0f] active:border-b-0 active:translate-y-[16px] transition-all duration-100 shadow-[0_20px_30px_rgba(0,0,0,0.9),inset_0_2px_2px_rgba(255,255,255,0.2)] flex items-center justify-center border-x-[6px] border-x-[#222] overflow-visible z-10">
+<div class="absolute inset-2 bg-gradient-to-br from-[#a67c00] via-[#bf953f] to-[#b38728] rounded-lg border-2 border-[#fbf5b7]/40 shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden">
+<div class="absolute top-1.5 left-1.5 size-2.5 rounded-full bg-[#1a110b] border border-[#fbf5b7]/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"></div>
+<div class="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-[#1a110b] border border-[#fbf5b7]/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"></div>
+<div class="absolute bottom-1.5 left-1.5 size-2.5 rounded-full bg-[#1a110b] border border-[#fbf5b7]/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"></div>
+<div class="absolute bottom-1.5 right-1.5 size-2.5 rounded-full bg-[#1a110b] border border-[#fbf5b7]/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"></div>
+<div class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-white/30 blur-2xl rounded-full opacity-0 group-active:opacity-100 group-active:scale-[2] transition-all duration-300 pointer-events-none z-20"></div>
+<div class="relative z-10 flex flex-col items-center justify-center pt-1">
+<span class="font-display font-black text-lg sm:text-xl text-[#1a110b] uppercase tracking-widest leading-tight text-center drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]">
+                    Valider la<br/>Transaction
+                </span>
+</div>
+</div>
+</button>
+<div class="h-[72px] w-[72px] shrink-0 rounded-full bg-gradient-to-br from-[#2a1b12] to-[#1a110b] border-[3px] border-[#b38728] shadow-[0_10px_20px_rgba(0,0,0,0.6),inset_0_2px_5px_rgba(255,255,255,0.1)] flex flex-col items-center justify-center text-[#bf953f] self-end mb-2 relative">
+<div class="absolute inset-2 rounded-full border border-[#4a3525] bg-[#111] opacity-50 flex items-center justify-center overflow-hidden">
+<div class="w-full h-full bg-[radial-gradient(circle_at_center,#4a3525_1px,transparent_1px)] bg-[length:4px_4px]"></div>
+</div>
+<span class="material-symbols-outlined text-[36px] drop-shadow-[0_0_8px_rgba(191,149,63,0.6)] relative z-10">volume_up</span>
+</div>
+</div>
+</main>
+<nav class="flex gap-2 border-t border-[#234248] bg-[#152528] px-4 pb-6 pt-3 shadow-[0_-5px_20px_rgba(0,0,0,0.3)] relative z-20">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">home</span>
+</div>
+<span class="text-[10px] uppercase font-bold tracking-wider">Accueil</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary relative -top-4" href="#">
+<div class="flex h-12 w-12 items-center justify-center bg-[#101f22] border-2 border-primary rounded-full shadow-[0_0_15px_rgba(19,200,236,0.3),inset_0_0_10px_rgba(19,200,236,0.2)]">
+<span class="material-symbols-outlined text-[32px] drop-shadow-[0_0_5px_rgba(19,200,236,0.8)]">add</span>
+</div>
+<span class="text-[10px] uppercase font-bold tracking-wider text-primary">Saisie</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-500 hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">person</span>
+</div>
+<span class="text-[10px] uppercase font-bold tracking-wider">Profil</span>
+</a>
+</nav>
+</body></html>
