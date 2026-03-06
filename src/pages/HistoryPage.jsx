@@ -1,28 +1,55 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNav from '../components/layout/BottomNav';
 import { useTransactions } from '../hooks/useTransactions';
 
 export default function HistoryPage() {
     const { transactions } = useTransactions();
+    const [expandedMonths, setExpandedMonths] = useState([new Date().toISOString().slice(0, 7)]); // Current month expanded by default
 
-    const formattedTransactions = useMemo(() => {
-        return transactions.map(tx => ({
-            id: tx.id,
-            date: new Date(tx.transaction_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
-            label: tx.label,
-            category: tx.categories?.name || 'Inconnu',
-            amount: parseFloat(tx.amount),
-            type: tx.type,
-            icon: tx.categories?.icon || 'receipt_long'
+    const groupedTransactions = useMemo(() => {
+        const groups = {};
+        transactions.forEach(tx => {
+            const date = new Date(tx.transaction_date);
+            const monthKey = date.toISOString().slice(0, 7); // YYYY-MM
+            if (!groups[monthKey]) groups[monthKey] = [];
+            groups[monthKey].push({
+                ...tx,
+                formattedDate: date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+                categoryName: tx.categories?.name || 'Inconnu',
+                categoryIcon: tx.categories?.icon || 'receipt_long',
+                amountNum: parseFloat(tx.amount)
+            });
+        });
+
+        // Sort keys descending
+        return Object.keys(groups).sort().reverse().map(key => ({
+            monthKey: key,
+            displayMonth: new Date(key + "-01").toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+            items: groups[key]
         }));
     }, [transactions]);
 
     const regulationImpact = useMemo(() => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
         return transactions
-            .filter(tx => tx.type === 'regulation')
+            .filter(tx => {
+                const d = new Date(tx.transaction_date);
+                return tx.type === 'regulation' && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            })
             .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
     }, [transactions]);
+
+    const toggleMonth = (monthKey) => {
+        setExpandedMonths(prev =>
+            prev.includes(monthKey)
+                ? prev.filter(m => m !== monthKey)
+                : [...prev, monthKey]
+        );
+    };
 
     const formatAmount = (amount, type) => {
         const eurFormatted = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(Math.abs(amount));
@@ -35,7 +62,7 @@ export default function HistoryPage() {
                 className="w-full max-w-[480px] min-h-screen flex flex-col relative overflow-hidden"
                 style={{ backgroundImage: 'radial-gradient(circle at center, rgba(212, 175, 55, 0.05) 0%, transparent 70%)' }}
             >
-                <PageHeader title="Grand Registre des Transactions" showBack={false} />
+                <PageHeader title="Historique" showBack={false} />
 
                 <div className="flex flex-col gap-3 px-4 py-6 relative z-0">
                     <div className="absolute inset-0 border-b border-brass/10 pointer-events-none"></div>
@@ -45,47 +72,53 @@ export default function HistoryPage() {
                         </p>
                         <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-brass text-sm">gavel</span>
-                            <p className="text-slate-400 text-xs sm:text-sm font-medium uppercase tracking-widest">Impact Mensuel des Régulations</p>
+                            <p className="text-slate-400 text-xs sm:text-sm font-medium uppercase tracking-widest">Impact Régulations (Mois en cours)</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Table Header */}
-                <div className="flex justify-between px-4 py-2 border-b border-brass/20">
-                    <div className="flex gap-4 sm:gap-8">
-                        <h3 className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">Date</h3>
-                        <h3 className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">Libellé</h3>
-                    </div>
-                    <h3 className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">Montant</h3>
-                </div>
+                {/* Grouped Transactions List */}
+                <div className="flex flex-col flex-1 pb-10 px-2">
+                    {groupedTransactions.map(group => (
+                        <div key={group.monthKey} className="mb-4">
+                            <button
+                                onClick={() => toggleMonth(group.monthKey)}
+                                className="w-full flex items-center justify-between p-3 bg-brass/10 border border-brass/30 rounded-lg mb-1 hover:bg-brass/20 transition-colors"
+                            >
+                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-brass">{group.displayMonth}</span>
+                                <span className="material-symbols-outlined text-brass transition-transform duration-300" style={{ transform: expandedMonths.includes(group.monthKey) ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                                    expand_more
+                                </span>
+                            </button>
 
-                {/* Transactions List */}
-                <div className="flex flex-col flex-1 pb-10">
-                    {formattedTransactions.map(tx => (
-                        <div key={tx.id} className="flex items-center gap-4 px-4 min-h-[80px] py-3 justify-between border-b border-brass/10 hover:bg-brass/5 transition-colors relative group">
-                            {/* Color indicator line */}
-                            <div className={`absolute left-0 top-0 bottom-0 w-1 ${tx.type === 'income' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)]'} opacity-70 group-hover:opacity-100 transition-opacity`}></div>
+                            {expandedMonths.includes(group.monthKey) && (
+                                <div className="flex flex-col border-x border-brass/10 bg-white/5 rounded-b-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                                    {group.items.map(tx => (
+                                        <div key={tx.id} className="flex items-center gap-3 px-3 min-h-[70px] py-2 justify-between border-b border-brass/5 hover:bg-brass/5 transition-colors relative group">
+                                            <div className={`absolute left-0 top-0 bottom-0 w-1 ${tx.type === 'income' ? 'bg-green-500' : 'bg-red-500'} opacity-50`}></div>
 
-                            <div className="flex items-center gap-4 w-full pl-2">
-                                <div className="w-12 shrink-0 text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest font-bold text-center">
-                                    {tx.date}
+                                            <div className="w-10 shrink-0 text-slate-400 dark:text-slate-500 text-[10px] uppercase font-bold text-center">
+                                                {tx.formattedDate}
+                                            </div>
+
+                                            <div className="text-brass flex items-center justify-center rounded-lg border border-brass/20 bg-[#e0d6c8] dark:bg-[#1a1614] shrink-0 size-8">
+                                                <span className="material-symbols-outlined text-base">{tx.categoryIcon}</span>
+                                            </div>
+
+                                            <div className="flex flex-col justify-center flex-1 min-w-0 pr-2">
+                                                <p className="text-slate-900 dark:text-slate-100 text-xs font-bold uppercase truncate">{tx.label}</p>
+                                                <p className="text-slate-500 dark:text-slate-400 text-[9px] font-medium tracking-widest uppercase truncate">{tx.categoryName}</p>
+                                            </div>
+
+                                            <div className="shrink-0 text-right">
+                                                <p className={`text-sm font-bold tracking-wider ${tx.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                                                    {formatAmount(tx.amountNum, tx.type)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-
-                                <div className="text-brass flex items-center justify-center rounded-lg border border-brass/30 bg-[#e0d6c8] dark:bg-[#1a1614] shrink-0 size-10 shadow-[inset_0_0_10px_rgba(212,175,55,0.2)]">
-                                    <span className="material-symbols-outlined text-xl">{tx.icon}</span>
-                                </div>
-
-                                <div className="flex flex-col justify-center flex-1 min-w-0 pr-2">
-                                    <p className="text-slate-900 dark:text-slate-100 text-sm sm:text-base font-bold leading-normal tracking-wide uppercase truncate">{tx.label}</p>
-                                    <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-medium leading-normal tracking-widest uppercase truncate">{tx.category}</p>
-                                </div>
-
-                                <div className="shrink-0 text-right">
-                                    <p className={`text-base sm:text-lg font-bold leading-normal tracking-wider ${tx.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-slate-800 dark:text-slate-200'}`}>
-                                        {formatAmount(tx.amount, tx.type)}
-                                    </p>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     ))}
                 </div>

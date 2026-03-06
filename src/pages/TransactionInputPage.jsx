@@ -44,24 +44,24 @@ export default function TransactionInputPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!categoryId && tab !== 'regulation') {
-            alert('Veuillez sélectionner une catégorie');
-            return;
-        }
+        setIsStamping(true);
 
         const success = await addTransaction({
             label,
             amount: parseFloat(amount),
             type: tab,
-            category_id: categoryId || categories.find(c => c.type === 'regulation')?.id || null, // default for regulation if nothing selected
-            is_recurring: isRegulationActive // Using this as recurring flag based on mockup
+            category_id: categories.find(c => c.type === tab || (tab === 'expense' && c.type === 'expense_variable') || (tab === 'fixed' && c.type === 'expense_fixed'))?.id || null,
+            is_recurring: isRegulationActive
         });
 
-        if (success) {
-            setLabel('');
-            setAmount('');
-            navigate('/');
-        }
+        setTimeout(() => {
+            setIsStamping(false);
+            if (success) {
+                setLabel('');
+                setAmount('');
+                navigate('/');
+            }
+        }, 600);
     };
 
     return (
@@ -77,7 +77,10 @@ export default function TransactionInputPage() {
                         {tabs.map((t) => (
                             <button
                                 key={t.id}
-                                onClick={() => setTab(t.id)}
+                                onClick={() => {
+                                    setTab(t.id);
+                                    setCategoryId('');
+                                }}
                                 className={`flex-1 py-2 text-[10px] sm:text-xs font-bold text-center rounded transition-all border ${tab === t.id ? t.activeClass : t.inactiveClass}`}
                             >
                                 {t.label}
@@ -89,55 +92,9 @@ export default function TransactionInputPage() {
                         {/* Left pipe decoration */}
                         <div className="absolute -left-6 top-0 bottom-0 w-2 bg-gradient-to-r from-[#4a3525] to-[#2a1b12] border-r border-[#6a4a2a] shadow-[2px_0_5px_rgba(0,0,0,0.5)] z-[-1]"></div>
 
-                        {/* Label Input */}
+                        {/* Amount Input FIRST */}
                         <div className="flex flex-col gap-2 relative">
-                            <label className={`text-xl font-cursive ${getThemeColor()} tracking-wide pl-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]`}>
-                                Libellé
-                            </label>
-                            <div className={`flex items-center rounded-lg bg-[#111c1e] border-2 border-[#4a3525] focus-within:${borderClass} transition-colors shadow-[inset_0_2px_5px_rgba(0,0,0,0.6)] overflow-hidden`}>
-                                <div className="px-4 py-3 bg-[#182629] border-r border-[#4a3525] flex items-center justify-center text-amber-600/70">
-                                    <span className="material-symbols-outlined">label</span>
-                                </div>
-                                <input
-                                    className="w-full bg-transparent border-none text-slate-200 placeholder-slate-600 focus:ring-0 p-4 font-mono text-base outline-none"
-                                    placeholder="ex: Carburant Vapeur, Loyer"
-                                    type="text"
-                                    value={label}
-                                    onChange={(e) => setLabel(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-                        {/* Category Select - only show if not regulation or if categories exist */}
-                        {tab !== 'regulation' && (
-                            <div className="flex flex-col gap-2 relative">
-                                <label className={`text-xl font-cursive ${getThemeColor()} tracking-wide pl-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]`}>
-                                    Catégorie
-                                </label>
-                                <div className={`flex items-center rounded-lg bg-[#111c1e] border-2 border-[#4a3525] focus-within:${borderClass} transition-colors shadow-[inset_0_2px_5px_rgba(0,0,0,0.6)] overflow-hidden`}>
-                                    <div className="px-4 py-3 bg-[#182629] border-r border-[#4a3525] flex items-center justify-center text-amber-600/70">
-                                        <span className="material-symbols-outlined">category</span>
-                                    </div>
-                                    <select
-                                        className="w-full bg-transparent border-none text-slate-200 focus:ring-0 p-4 font-mono text-base outline-none appearance-none"
-                                        value={categoryId}
-                                        onChange={(e) => setCategoryId(e.target.value)}
-                                        required
-                                    >
-                                        <option value="" disabled className="bg-[#111c1e]">Choisir une catégorie...</option>
-                                        {categories.filter(c => c.type === tab || (tab === 'expense' && c.type === 'expense_variable') || (tab === 'fixed' && c.type === 'expense_fixed')).map(c => (
-                                            <option key={c.id} value={c.id} className="bg-[#111c1e] text-slate-200">
-                                                {c.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Amount Input */}
-                        <div className="flex flex-col gap-2 relative">
-                            <label className={`text-xl font-cursive ${getThemeColor()} tracking-wide pl-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]`}>
+                            <label className={`text-sm font-bold text-slate-200 tracking-wide pl-2 uppercase opacity-80`}>
                                 Montant
                             </label>
                             <div className={`flex items-center rounded-lg bg-[#0d181a] border-2 border-primary/30 focus-within:${borderClass} transition-colors shadow-[0_0_15px_rgba(19,200,236,0.05),inset_0_2px_5px_rgba(0,0,0,0.8)] overflow-hidden group`}>
@@ -145,13 +102,33 @@ export default function TransactionInputPage() {
                                     <span className="material-symbols-outlined text-[28px]">toll</span>
                                 </div>
                                 <input
-                                    className="w-full bg-transparent border-none text-primary placeholder-primary/20 focus:ring-0 p-4 font-mono text-3xl text-right tracking-wider outline-none drop-shadow-[0_0_5px_rgba(19,200,236,0.5)]"
+                                    className="w-full bg-transparent border-none text-primary placeholder-primary/20 focus:ring-0 p-4 font-mono text-3xl text-right tracking-wider outline-none drop-shadow-[0_0_5px_rgba(19,200,236,0.6)]"
                                     placeholder="0.00"
                                     type="number"
                                     step="0.01"
                                     min="0"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        {/* Label Input SECOND */}
+                        <div className="flex flex-col gap-2 relative">
+                            <label className={`text-sm font-bold text-slate-200 tracking-wide pl-2 uppercase opacity-80`}>
+                                Libellé
+                            </label>
+                            <div className={`flex items-center rounded-lg bg-[#111c1e] border-2 border-[#4a3525] focus-within:${borderClass} transition-colors shadow-[inset_0_2px_5px_rgba(0,0,0,0.6)] overflow-hidden`}>
+                                <div className="px-4 py-3 bg-[#182629] border-r border-[#4a3525] flex items-center justify-center text-amber-600/70">
+                                    <span className="material-symbols-outlined">label</span>
+                                </div>
+                                <input
+                                    className="w-full bg-transparent border-none text-slate-200 placeholder-slate-600 focus:ring-0 p-4 font-bold tracking-wide text-base outline-none"
+                                    placeholder="ex: Carburant Vapeur, Loyer"
+                                    type="text"
+                                    value={label}
+                                    onChange={(e) => setLabel(e.target.value)}
                                     required
                                 />
                             </div>
@@ -175,32 +152,34 @@ export default function TransactionInputPage() {
                             </label>
                         </div>
 
-                        {/* Submit Button Area */}
-                        <div className="mt-8 flex items-center gap-3 w-full">
+                        {/* Submit Button Area - CENTERED */}
+                        <div className="mt-8 flex flex-col items-center gap-3 w-full">
                             <button
                                 type="submit"
-                                className="flex-1 relative group h-24 bg-gradient-to-b from-[#3a3a3a] to-[#1a1a1a] rounded-xl border-b-[16px] border-[#0f0f0f] active:border-b-0 active:translate-y-[16px] transition-all duration-100 shadow-[0_20px_30px_rgba(0,0,0,0.9),inset_0_2px_2px_rgba(255,255,255,0.2)] flex items-center justify-center border-x-[6px] border-x-[#222] overflow-visible z-10 cursor-pointer"
+                                disabled={isStamping}
+                                className={`w-full max-w-[320px] relative group h-24 bg-gradient-to-b from-[#3a3a3a] to-[#1a1a1a] rounded-xl border-b-[16px] border-[#0f0f0f] active:border-b-0 active:translate-y-[16px] transition-all duration-100 shadow-[0_20px_30px_rgba(0,0,0,0.9),inset_0_2px_2px_rgba(255,255,255,0.2)] flex items-center justify-center border-x-[6px] border-x-[#222] overflow-visible z-10 cursor-pointer ${isStamping ? 'translate-y-[12px] border-b-[4px] scale-[0.98]' : ''}`}
                             >
-                                <div className="absolute inset-2 bg-gradient-to-br from-[#a67c00] via-[#bf953f] to-[#b38728] rounded-lg border-2 border-[#fbf5b7]/40 shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden">
+                                <div className={`absolute inset-2 bg-gradient-to-br from-[#a67c00] via-[#bf953f] to-[#b38728] rounded-lg border-2 border-[#fbf5b7]/40 shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden transition-all duration-300 ${isStamping ? 'brightness-150' : ''}`}>
+                                    {/* Corner bolts */}
                                     <div className="absolute top-1.5 left-1.5 size-2.5 rounded-full bg-[#1a110b] border border-[#fbf5b7]/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"></div>
                                     <div className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-[#1a110b] border border-[#fbf5b7]/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"></div>
                                     <div className="absolute bottom-1.5 left-1.5 size-2.5 rounded-full bg-[#1a110b] border border-[#fbf5b7]/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"></div>
                                     <div className="absolute bottom-1.5 right-1.5 size-2.5 rounded-full bg-[#1a110b] border border-[#fbf5b7]/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"></div>
-                                    <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-white/30 blur-2xl rounded-full opacity-0 group-active:opacity-100 group-active:scale-[2] transition-all duration-300 pointer-events-none z-20"></div>
+
+                                    {/* Steam Effect */}
+                                    {isStamping && (
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                            <div className="w-full h-full bg-white animate-ping opacity-20 rounded-full blur-2xl"></div>
+                                        </div>
+                                    )}
+
                                     <div className="relative z-10 flex flex-col items-center justify-center pt-1">
-                                        <span className="font-display font-black text-lg sm:text-xl text-[#1a110b] uppercase tracking-widest leading-tight text-center drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]">
-                                            Valider la<br />Transaction
+                                        <span className={`font-display font-black text-lg sm:text-xl text-[#1a110b] uppercase tracking-widest leading-tight text-center drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)] ${isStamping ? 'scale-110' : ''}`}>
+                                            {isStamping ? "Impression..." : "Valider la\nTransaction"}
                                         </span>
                                     </div>
                                 </div>
                             </button>
-
-                            <div className="h-[72px] w-[72px] shrink-0 rounded-full bg-gradient-to-br from-[#2a1b12] to-[#1a110b] border-[3px] border-[#b38728] shadow-[0_10px_20px_rgba(0,0,0,0.6),inset_0_2px_5px_rgba(255,255,255,0.1)] flex flex-col items-center justify-center text-[#bf953f] self-end mb-2 relative">
-                                <div className="absolute inset-2 rounded-full border border-[#4a3525] bg-[#111] opacity-50 flex items-center justify-center overflow-hidden">
-                                    <div className="w-full h-full bg-[radial-gradient(circle_at_center,#4a3525_1px,transparent_1px)] bg-[length:4px_4px]"></div>
-                                </div>
-                                <span className="material-symbols-outlined text-[36px] drop-shadow-[0_0_8px_rgba(191,149,63,0.6)] relative z-10">volume_up</span>
-                            </div>
                         </div>
 
                     </form>
