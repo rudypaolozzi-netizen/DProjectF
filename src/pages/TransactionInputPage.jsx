@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNav from '../components/layout/BottomNav';
+import { useTransactions } from '../hooks/useTransactions';
+import { useCategories } from '../hooks/useCategories';
 
 export default function TransactionInputPage() {
+    const navigate = useNavigate();
+    const { addTransaction } = useTransactions();
+    const { categories } = useCategories();
+
     const [tab, setTab] = useState('expense'); // expense, income, fixed, regulation
+    const [categoryId, setCategoryId] = useState('');
     const [label, setLabel] = useState('');
     const [amount, setAmount] = useState('');
     const [isRegulationActive, setIsRegulationActive] = useState(true);
@@ -33,12 +41,27 @@ export default function TransactionInputPage() {
         tab === 'income' ? 'border-primary/50' :
             tab === 'fixed' ? 'border-bronze/50' : 'border-slate-500/50';
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Soumission:', { tab, label, amount, isRegulationActive });
-        // TODO: Send to InsForge
-        setLabel('');
-        setAmount('');
+
+        if (!categoryId && tab !== 'regulation') {
+            alert('Veuillez sélectionner une catégorie');
+            return;
+        }
+
+        const success = await addTransaction({
+            label,
+            amount: parseFloat(amount),
+            type: tab,
+            category_id: categoryId || categories.find(c => c.type === 'regulation')?.id || null, // default for regulation if nothing selected
+            is_recurring: isRegulationActive // Using this as recurring flag based on mockup
+        });
+
+        if (success) {
+            setLabel('');
+            setAmount('');
+            navigate('/');
+        }
     };
 
     return (
@@ -85,6 +108,32 @@ export default function TransactionInputPage() {
                                 />
                             </div>
                         </div>
+                        {/* Category Select - only show if not regulation or if categories exist */}
+                        {tab !== 'regulation' && (
+                            <div className="flex flex-col gap-2 relative">
+                                <label className={`text-xl font-cursive ${getThemeColor()} tracking-wide pl-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]`}>
+                                    Catégorie
+                                </label>
+                                <div className={`flex items-center rounded-lg bg-[#111c1e] border-2 border-[#4a3525] focus-within:${borderClass} transition-colors shadow-[inset_0_2px_5px_rgba(0,0,0,0.6)] overflow-hidden`}>
+                                    <div className="px-4 py-3 bg-[#182629] border-r border-[#4a3525] flex items-center justify-center text-amber-600/70">
+                                        <span className="material-symbols-outlined">category</span>
+                                    </div>
+                                    <select
+                                        className="w-full bg-transparent border-none text-slate-200 focus:ring-0 p-4 font-mono text-base outline-none appearance-none"
+                                        value={categoryId}
+                                        onChange={(e) => setCategoryId(e.target.value)}
+                                        required
+                                    >
+                                        <option value="" disabled className="bg-[#111c1e]">Choisir une catégorie...</option>
+                                        {categories.filter(c => c.type === tab || (tab === 'expense' && c.type === 'expense_variable') || (tab === 'fixed' && c.type === 'expense_fixed')).map(c => (
+                                            <option key={c.id} value={c.id} className="bg-[#111c1e] text-slate-200">
+                                                {c.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Amount Input */}
                         <div className="flex flex-col gap-2 relative">

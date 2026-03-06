@@ -1,24 +1,40 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNav from '../components/layout/BottomNav';
 import BudgetGauge from '../components/dashboard/BudgetGauge';
 import SectionCard from '../components/dashboard/SectionCard';
+import { useTransactions } from '../hooks/useTransactions';
+import { useBudget } from '../hooks/useBudget';
 
 export default function DashboardPage() {
-    // Temporary mock data until we fetch from InsForge
-    const stats = {
-        remaining: 2450,
-        ceiling: 5000,
-        fixed: 1200,
-        income: 4500,
-        variable: 850
-    };
+    const { transactions } = useTransactions();
+    const { budget } = useBudget();
 
-    const recentTransactions = [
-        { id: 1, date: '10.24', label: 'Fourniture Vapeur', amount: -45.00, type: 'expense' },
-        { id: 2, date: '10.23', label: 'Maintenance Engrenages', amount: -120.50, type: 'expense' },
-        { id: 3, date: '10.20', label: 'Prime Contrat', amount: 300.00, type: 'income' },
-    ];
+    const stats = useMemo(() => {
+        let income = 0;
+        let fixed = 0;
+        let variable = 0;
+
+        transactions.forEach(tx => {
+            const amt = parseFloat(tx.amount);
+            if (tx.type === 'income') income += amt;
+            else if (tx.type === 'fixed') fixed += amt;
+            else if (tx.type === 'expense') variable += amt;
+        });
+
+        const ceiling = budget?.ceiling || 0;
+        const remaining = ceiling + income - fixed - variable;
+
+        return { remaining, ceiling, fixed, income, variable };
+    }, [transactions, budget]);
+
+    const recentTransactions = transactions.slice(0, 3).map(tx => ({
+        id: tx.id,
+        date: new Date(tx.transaction_date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+        label: tx.label,
+        amount: parseFloat(tx.amount),
+        type: tx.type
+    }));
 
     return (
         <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col items-center justify-start overflow-x-hidden pb-20">

@@ -1,19 +1,30 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNav from '../components/layout/BottomNav';
+import { useTransactions } from '../hooks/useTransactions';
 
 export default function HistoryPage() {
-    const transactions = [
-        { id: 1, date: '12 OCT', label: 'Salaire Éther', category: 'REVENU', amount: 4500.00, type: 'income', icon: 'payments' },
-        { id: 2, date: '05 OCT', label: 'Loyer Vapeur', category: 'COÛT FIXE', amount: -1200.00, type: 'expense', icon: 'home' },
-        { id: 3, date: '02 OCT', label: 'Taxe Dirigeable', category: 'RÉGULATION', amount: -300.00, type: 'regulation', icon: 'policy' },
-        { id: 4, date: '28 SEP', label: 'Maint. Engrenages', category: 'RÉGULATION', amount: -150.00, type: 'regulation', icon: 'settings_suggest' },
-    ];
+    const { transactions } = useTransactions();
+
+    const formattedTransactions = useMemo(() => {
+        return transactions.map(tx => ({
+            id: tx.id,
+            date: new Date(tx.transaction_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+            label: tx.label,
+            category: tx.categories?.name || 'Inconnu',
+            amount: parseFloat(tx.amount),
+            type: tx.type,
+            icon: tx.categories?.icon || 'receipt_long'
+        }));
+    }, [transactions]);
+
+    const regulationImpact = useMemo(() => {
+        return transactions
+            .filter(tx => tx.type === 'regulation')
+            .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+    }, [transactions]);
 
     const formatAmount = (amount, type) => {
-        const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.abs(amount));
-        // Note: mockup shows $ instead of €. Let's use EUR for realism, but follow the mockup style: -$1,200.00
-        // Actually we decided earlier to use € for production, so let's use EUR.
         const eurFormatted = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(Math.abs(amount));
         return type === 'income' ? `+ ${eurFormatted}` : `- ${eurFormatted}`;
     };
@@ -29,8 +40,8 @@ export default function HistoryPage() {
                 <div className="flex flex-col gap-3 px-4 py-6 relative z-0">
                     <div className="absolute inset-0 border-b border-brass/10 pointer-events-none"></div>
                     <div className="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-lg border-2 border-brass/30 bg-gradient-to-b from-brass/10 to-transparent p-5 items-center text-center shadow-[inset_0_0_20px_rgba(212,175,55,0.1)]">
-                        <p className="text-red-500 tracking-wider text-4xl font-bold leading-tight drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">
-                            - {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(450.00)}
+                        <p className={`${regulationImpact >= 0 ? 'text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'} tracking-wider text-4xl font-bold leading-tight`}>
+                            {regulationImpact >= 0 ? '+' : '-'} {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(Math.abs(regulationImpact))}
                         </p>
                         <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-brass text-sm">gavel</span>
@@ -50,7 +61,7 @@ export default function HistoryPage() {
 
                 {/* Transactions List */}
                 <div className="flex flex-col flex-1 pb-10">
-                    {transactions.map(tx => (
+                    {formattedTransactions.map(tx => (
                         <div key={tx.id} className="flex items-center gap-4 px-4 min-h-[80px] py-3 justify-between border-b border-brass/10 hover:bg-brass/5 transition-colors relative group">
                             {/* Color indicator line */}
                             <div className={`absolute left-0 top-0 bottom-0 w-1 ${tx.type === 'income' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)]'} opacity-70 group-hover:opacity-100 transition-opacity`}></div>
