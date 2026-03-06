@@ -102,10 +102,9 @@ export default function TransactionInputPage() {
                                 </div>
                                 <input
                                     className="w-full bg-transparent border-none text-primary placeholder-primary/20 focus:ring-0 p-4 font-bold text-3xl text-right tracking-wider outline-none drop-shadow-[0_0_5px_rgba(19,200,236,0.6)]"
-                                    placeholder="0.00"
+                                    placeholder="+/- 0.00"
                                     type="number"
                                     step="0.01"
-                                    min="0"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
                                     required

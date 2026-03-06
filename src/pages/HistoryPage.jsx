@@ -53,7 +53,9 @@ export default function HistoryPage() {
 
     const formatAmount = (amount, type) => {
         const eurFormatted = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(Math.abs(amount));
-        return type === 'income' ? `+ ${eurFormatted}` : `- ${eurFormatted}`;
+        if (type === 'income') return `+ ${eurFormatted}`;
+        if (type === 'regulation') return (amount >= 0 ? `+ ` : `- `) + eurFormatted;
+        return `- ${eurFormatted}`;
     };
 
     return (
@@ -95,7 +97,7 @@ export default function HistoryPage() {
                                 <div className="flex flex-col border-x border-brass/10 bg-white/5 rounded-b-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
                                     {group.items.map(tx => (
                                         <div key={tx.id} className="flex items-center gap-3 px-3 min-h-[70px] py-2 justify-between border-b border-brass/5 hover:bg-brass/5 transition-colors relative group">
-                                            <div className={`absolute left-0 top-0 bottom-0 w-1 ${tx.type === 'income' ? 'bg-green-500' : 'bg-red-500'} opacity-50`}></div>
+                                            <div className={`absolute left-0 top-0 bottom-0 w-1 ${tx.type === 'income' || (tx.type === 'regulation' && tx.amountNum >= 0) ? 'bg-green-500' : 'bg-red-500'} opacity-50`}></div>
 
                                             <div className="w-10 shrink-0 text-slate-400 dark:text-slate-500 text-[10px] uppercase font-bold text-center">
                                                 {tx.formattedDate}
@@ -111,7 +113,7 @@ export default function HistoryPage() {
                                             </div>
 
                                             <div className="shrink-0 text-right">
-                                                <p className={`text-sm font-bold tracking-wider ${tx.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                                                <p className={`text-sm font-bold tracking-wider ${tx.type === 'income' || (tx.type === 'regulation' && tx.amountNum >= 0) ? 'text-green-600 dark:text-green-400' : 'text-slate-800 dark:text-slate-200'}`}>
                                                     {formatAmount(tx.amountNum, tx.type)}
                                                 </p>
                                             </div>

@@ -20,6 +20,7 @@ export default function DashboardPage() {
         let income = 0;
         let fixed = 0;
         let variable = 0;
+        let regulation = 0;
 
         transactions.forEach(tx => {
             const txDate = new Date(tx.transaction_date);
@@ -28,13 +29,14 @@ export default function DashboardPage() {
                 if (tx.type === 'income') income += amt;
                 else if (tx.type === 'fixed') fixed += amt;
                 else if (tx.type === 'expense') variable += amt;
+                else if (tx.type === 'regulation') regulation += amt;
             }
         });
 
         const ceiling = budget?.ceiling || 0;
-        const remaining = ceiling + income - fixed - variable;
+        const remaining = ceiling + income - fixed - variable + regulation;
 
-        return { remaining, ceiling, fixed, income, variable };
+        return { remaining, ceiling, fixed, income, variable, regulation };
     }, [transactions, budget]);
 
     const recentTransactions = transactions.slice(0, 3).map(tx => ({
@@ -119,8 +121,9 @@ export default function DashboardPage() {
                                         <span className="text-xs text-on-surface-variant opacity-70 shrink-0">{tx.date}</span>
                                         <span className="text-slate-200 truncate">{tx.label}</span>
                                     </div>
-                                    <span className={`${tx.type === 'income' ? 'text-primary' : 'text-bronze'} shrink-0 font-bold`}>
-                                        {tx.type === 'income' ? '+' : ''}{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(tx.amount)}
+                                    <span className={`${tx.type === 'income' || (tx.type === 'regulation' && tx.amount >= 0) ? 'text-primary' : 'text-bronze'} shrink-0 font-bold`}>
+                                        {tx.type === 'income' || (tx.type === 'regulation' && tx.amount >= 0) ? '+' : ''}
+                                        {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(tx.amount)}
                                     </span>
                                 </div>
                             ))}
