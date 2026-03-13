@@ -47,7 +47,31 @@ export default function HistoryPage() {
     };
 
     const handleExportCSV = (group) => {
-        const headers = ["Date", "Description", "Montant"];
+        const currentDate = new Date();
+        const currentMonthKey = currentDate.toISOString().slice(0, 7);
+        
+        let targetDateStr;
+        if (group.monthKey < currentMonthKey) {
+            // Month is finished, use last day of that month
+            const [year, month] = group.monthKey.split('-');
+            const lastDay = new Date(year, month, 0).getDate();
+            targetDateStr = `${group.monthKey}-${lastDay.toString().padStart(2, '0')}`;
+        } else {
+            // Current or future month, use today's date
+            targetDateStr = currentDate.toISOString().split('T')[0];
+        }
+
+        // Calculate cumul up to targetDateStr
+        const cumulAtDate = transactions
+            .filter(tx => tx.transaction_date <= targetDateStr)
+            .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+
+        const firstRow = [
+            targetDateStr,
+            `"cumul"`,
+            cumulAtDate
+        ];
+
         const rows = group.items.map(tx => [
             tx.transaction_date,
             `"${tx.label.replace(/"/g, '""')}"`, // escape quotes
@@ -55,7 +79,7 @@ export default function HistoryPage() {
         ]);
 
         const csvContent = [
-            headers.join(";"),
+            firstRow.join(";"),
             ...rows.map(row => row.join(";"))
         ].join("\n");
 
