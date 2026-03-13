@@ -49,10 +49,9 @@ export function TransactionsProvider({ children }) {
             })
             .select();
 
-        if (!error) {
-            // Re-fetch to guarantee sync with DB or manually append
-            fetchTransactions();
-            return data?.[0];
+        if (!error && data) {
+            setTransactions(prev => [data[0], ...prev]);
+            return data[0];
         }
         console.error('Error adding transaction:', error);
         return null;
@@ -70,7 +69,7 @@ export function TransactionsProvider({ children }) {
             .lte('transaction_date', endDate);
 
         if (!error) {
-            fetchTransactions();
+            setTransactions(prev => prev.filter(t => !t.transaction_date.startsWith(year.toString())));
             return true;
         }
         console.error('Error deleting transactions:', error);
