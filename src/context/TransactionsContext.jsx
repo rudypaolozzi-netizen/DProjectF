@@ -1,14 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { insforge } from '../lib/insforge';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from './AuthContext';
 
-export function useTransactions() {
+const TransactionsContext = createContext();
+
+export function TransactionsProvider({ children }) {
     const { user } = useAuth();
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const fetchTransactions = useCallback(async () => {
-        if (!user) return;
+        if (!user) {
+            setTransactions([]);
+            setLoading(false);
+            return;
+        }
+        
         setLoading(true);
         const { data, error } = await insforge.database
             .from('transactions')
@@ -43,6 +50,7 @@ export function useTransactions() {
             .select();
 
         if (!error) {
+            // Re-fetch to guarantee sync with DB or manually append
             fetchTransactions();
             return data?.[0];
         }
@@ -84,5 +92,22 @@ export function useTransactions() {
         return false;
     };
 
-    return { transactions, loading, addTransaction, deleteTransactionsByYear, deleteAllTransactions, refresh: fetchTransactions };
+    const value = {
+        transactions,
+        loading,
+        addTransaction,
+        deleteTransactionsByYear,
+        deleteAllTransactions,
+        refresh: fetchTransactions
+    };
+
+    return (
+        <TransactionsContext.Provider value={value}>
+            {children}
+        </TransactionsContext.Provider>
+    );
+}
+
+export function useTransactions() {
+    return useContext(TransactionsContext);
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNav from '../components/layout/BottomNav';
-import { useTransactions } from '../hooks/useTransactions';
+import { useTransactions } from '../context/TransactionsContext';
 
 export default function TransactionInputPage() {
     const navigate = useNavigate();

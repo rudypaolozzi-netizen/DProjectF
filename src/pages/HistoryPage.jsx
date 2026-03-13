@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNav from '../components/layout/BottomNav';
-import { useTransactions } from '../hooks/useTransactions';
+import { useTransactions } from '../context/TransactionsContext';
 
 export default function HistoryPage() {
     const { transactions, deleteTransactionsByYear } = useTransactions();
