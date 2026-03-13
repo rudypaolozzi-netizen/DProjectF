@@ -3,64 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/layout/PageHeader';
 import BottomNav from '../components/layout/BottomNav';
 import BudgetGauge from '../components/dashboard/BudgetGauge';
-import SectionCard from '../components/dashboard/SectionCard';
 import { useTransactions } from '../hooks/useTransactions';
-import { useBudget } from '../hooks/useBudget';
 
 export default function DashboardPage() {
     const navigate = useNavigate();
     const { transactions } = useTransactions();
 
-    const stats = useMemo(() => {
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-
-        let totalIncome = 0;
-        let totalExpenses = 0;
-        let regulationImpact = 0;
-        let fixed = 0;
-        let variable = 0;
-
-        transactions.forEach(tx => {
-            const txDate = new Date(tx.transaction_date);
-            if (txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) {
-                const amt = parseFloat(tx.amount);
-                if (tx.type === 'income') {
-                    totalIncome += amt;
-                } else if (tx.type === 'fixed') {
-                    fixed += amt;
-                    totalExpenses += amt;
-                } else if (tx.type === 'expense') {
-                    variable += amt;
-                    totalExpenses += amt;
-                } else if (tx.type === 'regulation') {
-                    regulationImpact += amt;
-                }
-            }
-        });
-
-        // The user wants the central figure to be identical to History's header
-        // which is "Impact Régulations (Mois en cours)"
-        const displayBalance = regulationImpact;
-
-        return {
-            displayBalance,
-            regulationImpact,
-            totalIncome,
-            totalExpenses,
-            fixed,
-            income: totalIncome,
-            variable
-        };
+    const cumul = useMemo(() => {
+        return transactions.reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
     }, [transactions]);
 
     const recentTransactions = transactions.slice(0, 3).map(tx => ({
         id: tx.id,
         date: new Date(tx.transaction_date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
         label: tx.label,
-        amount: parseFloat(tx.amount),
-        type: tx.type
+        amount: parseFloat(tx.amount)
     }));
 
     return (
@@ -70,13 +27,13 @@ export default function DashboardPage() {
                 <PageHeader title="Tableau de Bord" />
 
                 <main className="flex-1 flex flex-col gap-6 p-4">
-                    <BudgetGauge remaining={stats.displayBalance} totalIncome={stats.totalIncome || 1} />
+                    <BudgetGauge cumul={cumul} />
 
-                    {/* Régulation du mois */}
+                    {/* Mouvement Financier */}
                     <section className="flex flex-col gap-3">
                         <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant border-b border-surface-variant pb-2 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-base">tune</span>
-                            Régulation du mois
+                            <span className="material-symbols-outlined text-base">account_balance_wallet</span>
+                            Mouvement Financier
                         </h2>
                         <div className="flex justify-center">
                             <button
@@ -89,37 +46,6 @@ export default function DashboardPage() {
                         </div>
                     </section>
 
-                    {/* Sections */}
-                    <section className="flex flex-col gap-4">
-                        <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant border-b border-surface-variant pb-2 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-base">account_tree</span>
-                            Sections
-                        </h2>
-                        <div className="flex flex-col gap-3">
-                            <SectionCard
-                                title="Fixes"
-                                subtitle="Drain Statique"
-                                amount={stats.fixed}
-                                icon="lock"
-                                type="fixed"
-                            />
-                            <SectionCard
-                                title="Entrées"
-                                subtitle="Entrée Aether"
-                                amount={stats.income}
-                                icon="bolt"
-                                type="income"
-                            />
-                            <SectionCard
-                                title="Dépenses"
-                                subtitle="Flux Dynamique"
-                                amount={stats.variable}
-                                icon="waves"
-                                type="variable"
-                            />
-                        </div>
-                    </section>
-
                     {/* Historique Mini */}
                     <section className="flex flex-col gap-3 mt-4">
                         <div className="flex items-center justify-between border-b border-surface-variant pb-2">
@@ -127,7 +53,7 @@ export default function DashboardPage() {
                                 <span className="material-symbols-outlined text-base">history_edu</span>
                                 Historique Récent
                             </h2>
-                            <button className="text-xs text-primary hover:underline uppercase tracking-wider">Archives</button>
+                            <button onClick={() => navigate('/history')} className="text-xs text-primary hover:underline uppercase tracking-wider">Archives</button>
                         </div>
 
                         <div className="flex flex-col gap-2 font-mono text-sm">
@@ -137,12 +63,15 @@ export default function DashboardPage() {
                                         <span className="text-xs text-on-surface-variant opacity-70 shrink-0">{tx.date}</span>
                                         <span className="text-slate-200 truncate">{tx.label}</span>
                                     </div>
-                                    <span className={`${tx.type === 'income' || (tx.type === 'regulation' && tx.amount >= 0) ? 'text-primary' : 'text-bronze'} shrink-0 font-bold`}>
-                                        {tx.type === 'income' || (tx.type === 'regulation' && tx.amount >= 0) ? '+' : ''}
+                                    <span className={`${tx.amount >= 0 ? 'text-primary' : 'text-red-500'} shrink-0 font-bold`}>
+                                        {tx.amount >= 0 ? '+' : ''}
                                         {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(tx.amount)}
                                     </span>
                                 </div>
                             ))}
+                            {recentTransactions.length === 0 && (
+                                <p className="text-center text-slate-500 text-xs py-4">Aucune transaction récente</p>
+                            )}
                         </div>
                     </section>
 

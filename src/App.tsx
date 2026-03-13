@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage';
 import TransactionInputPage from './pages/TransactionInputPage';
 import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
+import ResetDataPage from './pages/ResetDataPage'; // Temp import
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth() as any;
@@ -21,6 +22,7 @@ function App() {
           <Route path="/input" element={<PrivateRoute><TransactionInputPage /></PrivateRoute>} />
           <Route path="/history" element={<PrivateRoute><HistoryPage /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+          <Route path="/reset-db-temp" element={<PrivateRoute><ResetDataPage /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
@@ -28,4 +30,3 @@ function App() {
 }
 
 export default App;
-;

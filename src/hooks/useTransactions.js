@@ -12,7 +12,7 @@ export function useTransactions() {
         setLoading(true);
         const { data, error } = await insforge.database
             .from('transactions')
-            .select('*, categories(*)')
+            .select('*')
             .order('transaction_date', { ascending: false });
 
         if (!error && data) {
@@ -27,7 +27,7 @@ export function useTransactions() {
         fetchTransactions();
     }, [fetchTransactions]);
 
-    const addTransaction = async ({ label, amount, type, category_id, is_recurring }) => {
+    const addTransaction = async ({ label, amount }) => {
         if (!user) return null;
         const { data, error } = await insforge.database
             .from('transactions')
@@ -35,9 +35,9 @@ export function useTransactions() {
                 user_id: user.id,
                 label,
                 amount: parseFloat(amount),
-                type,
-                category_id,
-                is_recurring: !!is_recurring,
+                type: 'entry',
+                category_id: null,
+                is_recurring: false,
                 transaction_date: new Date().toISOString().split('T')[0]
             })
             .select();
@@ -50,5 +50,39 @@ export function useTransactions() {
         return null;
     };
 
-    return { transactions, loading, addTransaction, refresh: fetchTransactions };
+    const deleteTransactionsByYear = async (year) => {
+        if (!user) return false;
+        const startDate = `${year}-01-01`;
+        const endDate = `${year}-12-31`;
+
+        const { error } = await insforge.database
+            .from('transactions')
+            .delete()
+            .gte('transaction_date', startDate)
+            .lte('transaction_date', endDate);
+
+        if (!error) {
+            fetchTransactions();
+            return true;
+        }
+        console.error('Error deleting transactions:', error);
+        return false;
+    };
+
+    const deleteAllTransactions = async () => {
+        if (!user) return false;
+        const { error } = await insforge.database
+            .from('transactions')
+            .delete()
+            .eq('user_id', user.id);
+
+        if (!error) {
+            setTransactions([]);
+            return true;
+        }
+        console.error('Error deleting all transactions:', error);
+        return false;
+    };
+
+    return { transactions, loading, addTransaction, deleteTransactionsByYear, deleteAllTransactions, refresh: fetchTransactions };
 }
