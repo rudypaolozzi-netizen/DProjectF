@@ -42,7 +42,7 @@ export function TransactionsProvider({ children }) {
                 user_id: user.id,
                 label,
                 amount: parseFloat(amount),
-                type: 'entry',
+                type: parseFloat(amount) >= 0 ? 'income' : 'expense',
                 category_id: null,
                 is_recurring: false,
                 transaction_date: new Date().toISOString().split('T')[0]

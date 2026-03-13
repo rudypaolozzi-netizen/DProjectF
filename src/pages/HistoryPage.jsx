@@ -171,7 +171,7 @@ export default function HistoryPage() {
                                 </button>
                                 <button
                                     onClick={() => handleExportCSV(group)}
-                                    className="w-12 h-full flex items-center justify-center bg-surface/20 border border-surface-variant rounded-lg text-brass hover:bg-surface/40 transition-colors"
+                                    className="w-12 h-full flex items-center justify-center bg-surface/20 border border-surface-variant rounded-lg text-black hover:bg-surface/40 transition-colors"
                                     title="Exporter CSV"
                                 >
                                     <span className="material-symbols-outlined text-lg">download</span>

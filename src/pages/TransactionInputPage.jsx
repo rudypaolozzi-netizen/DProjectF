@@ -95,11 +95,10 @@ export default function TransactionInputPage() {
                                 <input
                                     className={`w-full bg-transparent border-none ${sign === 'plus' ? 'text-green-400' : sign === 'minus' ? 'text-red-400' : 'text-primary'} placeholder-slate-600 focus:ring-0 p-4 font-bold text-3xl text-right tracking-wider outline-none`}
                                     placeholder="0.00"
-                                    type="number"
-                                    step="0.01"
-                                    min="0.01"
+                                    type="text"
+                                    inputMode="decimal"
                                     value={amount}
-                                    onChange={(e) => setAmount(Math.abs(parseFloat(e.target.value) || '')?.toString() || e.target.value)} // always positive in input
+                                    onChange={(e) => setAmount(e.target.value.replace(',', '.').replace('-', ''))} // keep string as is, replace commas and minuses
                                     required
                                 />
                             </div>
